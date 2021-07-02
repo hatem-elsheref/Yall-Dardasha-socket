@@ -1,6 +1,5 @@
 const os = require('os');
-const nodeStatic = require('node-static');
-const http = require('http');
+const http = require('http').createServer();
 const io = require('socket.io')(http, {
     cors: {
         origin: "*",
@@ -8,13 +7,8 @@ const io = require('socket.io')(http, {
         credentials: true
     }
 });
-const fileServer = new(nodeStatic.Server)();
-const app = http.createServer(function(req, res) {
-    fileServer.serve(req, res);
-}).listen(process.env.PORT || 3000);
 
 io.sockets.on('connection', function(socket) {
-
     // convenience function to log server messages on the client
     function log() {
         const array = ['Message from server:'];
@@ -66,3 +60,6 @@ io.sockets.on('connection', function(socket) {
         console.log('received bye');
     });
 });
+
+
+http.listen(process.env.PORT || 3000);
