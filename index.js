@@ -1,25 +1,18 @@
 const os = require('os');
 const nodeStatic = require('node-static');
 const http = require('http');
-const socketIO = require('socket.io')(http, {
+const io = require('socket.io')(http, {
     cors: {
         origin: "*",
-        methods: ["GET"]
+        methods: ["GET"],
+        credentials: true
     }
 });
 const fileServer = new(nodeStatic.Server)();
 const app = http.createServer(function(req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    // Request headers you wish to allow
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    // Set to true if you need the website to include cookies in the requests sent
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    // Pass to next layer of middleware
-    // next();
     fileServer.serve(req, res);
 }).listen(process.env.PORT || 3000);
 
-const io = socketIO.listen(app);
 io.sockets.on('connection', function(socket) {
 
     // convenience function to log server messages on the client
