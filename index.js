@@ -2,7 +2,7 @@ const os = require('os');
 const http = require('http').createServer();
 const io = require('socket.io')(http, {
     cors: {
-        origin: "*",
+        origin: "http://localhost:2020",
         methods: ["GET"],
         credentials: true
     }
