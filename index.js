@@ -1,7 +1,12 @@
 const os = require('os');
 const nodeStatic = require('node-static');
 const http = require('http');
-const socketIO = require('socket.io');
+const socketIO = require('socket.io')(http, {
+    cors: {
+        origin: "*",
+        methods: ["GET"]
+    }
+});
 const fileServer = new(nodeStatic.Server)();
 const app = http.createServer(function(req, res) {
     fileServer.serve(req, res);
