@@ -1,48 +1,78 @@
 const os = require('os');
 const http = require('http').createServer();
-const io = require('socket.io')(http, {
-    cors: {
-        origin: "http://localhost:2020",
-        methods: ["GET"],
-        credentials: true
-    }
-});
+const io = require('socket.io')(http);
+
 
 io.sockets.on('connection', function(socket) {
-    // convenience function to log server messages on the client
-    function log() {
-        const array = ['Message from server:'];
-        array.push.apply(array, arguments);
-        socket.emit('log', array);
-    }
 
-    socket.on('message', function(message) {
-        log('Client said: ', message);
-        // for a real app, would be room-only (not broadcast)
-        socket.broadcast.emit('message', message);
-    });
-
-    socket.on('create or join', function(room) {
-        log('Received request to create or join room ' + room);
-
-        const numClients = io.sockets.sockets.length;
-        log('Room ' + room + ' now has ' + numClients + ' client(s)');
-
-        if (numClients === 1) {
-            socket.join(room);
-            log('Client ID ' + socket.id + ' created room ' + room);
-            socket.emit('created', room, socket.id);
-
-        } else if (numClients > 0) {
-            log('Client ID ' + socket.id + ' joined room ' + room);
-            io.sockets.in(room).emit('join', room);
-            socket.join(room);
-            socket.emit('joined', room, socket.id);
-            io.sockets.in(room).emit('ready');
-        } else { // if max or error
-            socket.emit('full', room);
+    socket.on('create', function (info){
+        try{
+            const data = JSON.parse(info)
+            socket.join(data.roomId)
+            socket.emit('room_created', {message: 'room created successfully'})
+        }catch(e){
+            socket.emit('error', {message: 'couldn\'t perform requested action'});
         }
-    });
+    })
+
+    socket.on('join', function (info){
+        try{
+            const data = JSON.parse(info)
+            socket.join(data.roomId)
+            socket.emit('joined_room',  {message: 'joined successfully'})
+            io.to(data.roomId).emit('refresh', {message: 'new member joined so try to refresh the view'})
+        }catch(e){
+            socket.emit('error', {message: 'couldn\'t perform requested action'});
+        }
+    })
+
+    socket.on('leave',function(info){
+        try{
+            const data = JSON.parse(info)
+            socket.leave(data.roomId);
+            io.to(data.roomId).emit('refresh', {message: "there is member left the room so try to refresh the view"});
+        }catch(e){
+            socket.emit('error', {message: 'couldn\'t perform requested action'});
+        }
+    })
+
+    socket.on('want_to_speak', function(info) {
+        const data = JSON.parse(info)
+        // moderator or room admin only can see this event
+        socket.to(data.roomId).emit('listen_if_member_want_to_speak', {username: data.username, socketId: io.sockets.sessionId});
+    })
+
+    socket.on('allow_member_to_speak', function(info) {
+        const data = JSON.parse(info)
+        // the member who try to rise hand to speak => change state from audience to speaker
+        socket.to(data.memberSocketId).emit('if_i_can_speak', {message: "you are speaker now"});
+        io.to(data.roomId).emit('refresh', {message: "there is member changed his state from audience to speaker so try to refresh the view"});
+    })
+
+    socket.on('dis_allow_member_to_speak', function(info) {
+        const data = JSON.parse(info)
+        // moderator or room admin only can see this event
+        socket.to(data.memberSocketId).emit('listen_if_moderator_cancel_my_request', {message: "your request to be speaker refused by admin"});
+    })
+
+    socket.on('move_to_audience', function(info) {
+        const data = JSON.parse(info)
+        io.to(data.roomId).emit('refresh', {message: "there is a member moved to audience"});
+    })
+
+
+    socket.on('member_open_mic', function(info) {
+        const data = JSON.parse(info)
+        io.to(data.roomId).emit('refresh_mic', {message: "there is a member opened his mic", userId: data.userId});
+    })
+
+    socket.on('member_closed_mic', function(info) {
+        const data = JSON.parse(info)
+        io.to(data.roomId).emit('refresh_mic', {message: "there is a member opened his mic", userId: data.userId});
+    })
+
+
+
 
     socket.on('ipaddr', function() {
         const ifaces = os.networkInterfaces();
@@ -56,9 +86,6 @@ io.sockets.on('connection', function(socket) {
     });
 
 
-    socket.on('bye', function(){
-        console.log('received bye');
-    });
 });
 
 
