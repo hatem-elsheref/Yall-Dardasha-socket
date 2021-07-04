@@ -1,9 +1,8 @@
 const os = require('os');
-const http = require('http').createServer();
-const io = require('socket.io')(http);
+const server = require('http').createServer();
+const io = require("socket.io")(server, { serveClient: false });
 
-
-io.sockets.on('connection', function(socket) {
+io.on('connection', function(socket) {
 
     socket.on('create', function (info){
         try{
@@ -89,4 +88,4 @@ io.sockets.on('connection', function(socket) {
 });
 
 
-http.listen(process.env.PORT || 3000);
+server.listen(process.env.PORT || 3000);
