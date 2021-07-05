@@ -1,8 +1,16 @@
 const os = require('os');
 const server = require('http').createServer();
-const io = require("socket.io")(server, { serveClient: false });
+// const io = require("socket.io")(server,
+//     { serveClient: false,
+// cors:{
+//     origins: ["http://localhost:2020"],
+//     method: ["GET", "POST"]
+// }});
 
+
+const io = require("socket.io")(server)
 io.on('connection', function(socket) {
+
 
     socket.on('create', function (info){
         try{
