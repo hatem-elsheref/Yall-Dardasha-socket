@@ -1,13 +1,5 @@
 const os = require('os');
 const server = require('http').createServer();
-// const io = require("socket.io")(server,
-//     { serveClient: false,
-// cors:{
-//     origins: ["http://localhost:2020"],
-//     method: ["GET", "POST"]
-// }});
-
-
 const io = require("socket.io")(server)
 io.on('connection', function(socket) {
 
@@ -75,7 +67,7 @@ io.on('connection', function(socket) {
 
     socket.on('member_closed_mic', function(info) {
         const data = JSON.parse(info)
-        io.to(data.roomId).emit('refresh_mic', {message: "there is a member opened his mic", userId: data.userId});
+        io.to(data.roomId).emit('refresh_mic', {message: "there is a member closed his mic", userId: data.userId});
     })
 
 

@@ -28,3 +28,12 @@
     </script>
 </body>
 </html>
+
+
+// const io = require("socket.io")(server,
+//     { serveClient: false,
+// cors:{
+//     origins: ["http://localhost:2020"],
+//     method: ["GET", "POST"]
+// }});
+
