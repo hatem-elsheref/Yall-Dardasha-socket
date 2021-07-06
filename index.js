@@ -78,7 +78,7 @@ io.on('connection', function(socket) {
               socket.emmit('no_thing_happend', {message: 'some thing went wrong in server so -> stay every thing at old state'})
               throw error
           }
-        socket.to(socketId).emit('room_ended', {message : 'admin ended the room so -> android dev  make alert and then go back and refresh to show all rooms '})
+        socket.to(data.roomId).emit('room_ended', {message : 'admin ended the room so -> android dev  make alert and then go back and refresh to show all rooms '})
         socket.emit('my_room_ended', {message: "you closed the room so -> android dev make alert and then go back and refresh to show all rooms "})
         socketIds.forEach(function(socketId){io.sockets.sockets[socketId].leave(data.roomId);});
         });
