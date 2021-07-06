@@ -38,7 +38,7 @@ io.on('connection', function (socket) {
     socket.on('want_to_speak', function (info) {
         const data = JSON.parse(info)
         // moderator or room admin only can see this event
-        socket.to(data.roomId).emit('listen_if_member_want_to_speak', { username: data.username, socketId: io.sockets.sessionId });
+        socket.to(data.roomId).emit('listen_if_member_want_to_speak', { username: data.username, socketId: socket.id });
     })
 
     socket.on('allow_member_to_speak', function (info) {
