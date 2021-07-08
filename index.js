@@ -19,7 +19,7 @@ io.on('connection', function (socket) {
             const data = JSON.parse(info)
             socket.join(data.roomId)
             socket.emit('joined_room', { message: 'joined successfully' })
-            io.to(data.roomId).emit('refresh', { message: 'new member joined so try to refresh the view' })
+            socket.to(data.roomId).emit('refresh', { message: 'new member joined so try to refresh the view' })
         } catch (e) {
             socket.emit('error', { message: 'couldn\'t perform requested action' });
         }
@@ -37,7 +37,7 @@ io.on('connection', function (socket) {
 
     socket.on('want_to_speak', function (info) {
         const data = JSON.parse(info)
-        // moderator or room admin only can see this event
+        // moderator or room admin only can see this event isRoomCreator() room data auth user id == room.creator
         socket.to(data.roomId).emit('listen_if_member_want_to_speak', { username: data.username, socketId: socket.id });
     })
 
@@ -45,6 +45,7 @@ io.on('connection', function (socket) {
         const data = JSON.parse(info)
         // the member who try to rise hand to speak => change state from audience to speaker
         socket.to(data.memberSocketId).emit('if_i_can_speak', { message: "you are speaker now" });
+        // call api to move member from audience to speakers toSpeaker toAudience id room id user
         io.to(data.roomId).emit('refresh', { message: "there is member changed his state from audience to speaker so try to refresh the view" });
     })
 
@@ -82,6 +83,16 @@ io.on('connection', function (socket) {
             throw error
         }
     });
+
+
+
+    socket.on('start_call', function (info) {
+        const data = JSON.parse(info)
+        // send broadcast to all members in the given room but the only admin or room_creator
+        socket.to(data.roomId).emit('start_call', { message: "there is a member want to start call"});
+    })
+
+
 
     socket.on('ipaddr', function () {
         const ifaces = os.networkInterfaces();
