@@ -79,7 +79,7 @@ io.on('connection', function (socket) {
             io.socketsLeave(data.roomId);
             socket.emit('my_room_ended', { message: "you closed the room so -> android dev make alert and then go back and refresh to show all rooms " })
         } catch (error) {
-            socket.emmit('no_thing_happend', { message: 'some thing went wrong in server so -> stay every thing at old state' })
+            socket.emit('no_thing_happend', { message: 'some thing went wrong in server so -> stay every thing at old state' })
             throw error
         }
     });
