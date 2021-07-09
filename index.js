@@ -93,6 +93,21 @@ io.on('connection', function (socket) {
     })
 
 
+    socket.on('webrtc_offer', (info) => {
+        let data = JSON.parse(info)
+        socket.broadcast.to(data.roomId).emit('webrtc_offer', {sdp : data.sdp})
+    })
+
+    socket.on('webrtc_answer', (info) => {
+        let data = JSON.parse(info)
+        socket.broadcast.to(data.roomId).emit('webrtc_answer', {sdp: data.sdp})
+    })
+    socket.on('webrtc_ice_candidate', (info) => {
+        let data = JSON.parse(info)
+        socket.broadcast.to(data.roomId).emit('webrtc_ice_candidate', data)
+    })
+
+
 
     socket.on('ipaddr', function () {
         const ifaces = os.networkInterfaces();
